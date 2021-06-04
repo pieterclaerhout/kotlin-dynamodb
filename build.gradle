@@ -14,6 +14,7 @@ repositories {
 dependencies {
     implementation platform('software.amazon.awssdk:bom:2.16.29')
     implementation 'software.amazon.awssdk:dynamodb-enhanced'
+    implementation 'io.github.serpro69:kotlin-faker:1.7.1'
     implementation 'org.apache.logging.log4j:log4j-api:2.13.0'
     implementation 'org.apache.logging.log4j:log4j-core:2.13.0'
     implementation 'org.apache.logging.log4j:log4j-slf4j18-impl:2.13.0'

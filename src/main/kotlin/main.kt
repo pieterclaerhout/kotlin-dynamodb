@@ -1,3 +1,4 @@
+import io.github.serpro69.kfaker.Faker
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
@@ -22,12 +23,14 @@ fun main() {
 
     val repo = SignupRepo(db)
 
+    val faker = Faker()
+
     println("Creating items…")
     for (i in 1L..100L) {
         val recentSignup = Signup(
             id = i,
             uuid = UUID.randomUUID().toString(),
-            name = UUID.randomUUID().toString()
+            name = faker.name.name()
         )
         repo.save(recentSignup)
     }
