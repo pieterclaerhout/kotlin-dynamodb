@@ -8,9 +8,15 @@ version = '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    maven { url "https://jitpack.io" }
 }
 
 dependencies {
+    implementation platform('software.amazon.awssdk:bom:2.16.29')
+    implementation 'software.amazon.awssdk:dynamodb-enhanced'
+    implementation 'org.apache.logging.log4j:log4j-api:2.13.0'
+    implementation 'org.apache.logging.log4j:log4j-core:2.13.0'
+    implementation 'org.apache.logging.log4j:log4j-slf4j18-impl:2.13.0'
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
 }
 
