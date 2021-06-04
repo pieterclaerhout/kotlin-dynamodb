@@ -22,22 +22,25 @@ fun main() {
 
     val repo = SignupRepo(db)
 
-    for (i in 1L..200L) {
+    println("Creating items…")
+    for (i in 1L..100L) {
         val recentSignup = Signup(
-            i,
-            UUID.randomUUID().toString(),
-            UUID.randomUUID().toString()
+            id = i,
+            uuid = UUID.randomUUID().toString(),
+            name = UUID.randomUUID().toString()
         )
         repo.save(recentSignup)
     }
+    println("Created items")
 
-    val signup = repo.retrieve(1)
-    println(signup)
-
-    val result = repo.query(1)
-    result?.stream()?.forEach { p ->
-        p.items().forEach { item ->
-            println(item)
+    for (i in 1..5) {
+        println()
+        val items = repo.randomItems(3)
+        if (items.size == 0) {
+            println("No items found")
+        }
+        items.forEach {
+            println("${i} ${it}")
         }
     }
 
