@@ -3,6 +3,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbParti
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.util.*
 
 @DynamoDbBean
 data class Signup(
@@ -10,6 +11,6 @@ data class Signup(
     @get:DynamoDbSortKey var uuid: String? = null,
     var id: Long? = null,
     var name: String? = null,
-    var createdOn: Long? = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC),
+    var createdOn: Long? = Calendar.getInstance().timeInMillis / 1000,
     var expiresOn: Long? = 0
 )
