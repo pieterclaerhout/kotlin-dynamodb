@@ -9,8 +9,8 @@ import java.util.*
 fun main() {
 
     val awsCreds = AwsBasicCredentials.create(
-        "AKIAS7D5VHOZLONHAUVP",
-        "Z8HDTp1um18UTHKGtu3xb05aaPHsy8Zdvjobgggr"
+        System.getenv("AWS_ACCESS_KEY"),
+        System.getenv("AWS_SECRET_KEY")
     )
 
     val client = DynamoDbClient
@@ -25,16 +25,16 @@ fun main() {
 
     val faker = Faker()
 
-    println("Creating items…")
-    for (i in 1L..100L) {
-        val recentSignup = Signup(
-            id = i,
-            uuid = UUID.randomUUID().toString(),
-            name = faker.name.name()
-        )
-        repo.save(recentSignup)
-    }
-    println("Created items")
+//    println("Creating items…")
+//    for (i in 1L..100L) {
+//        val recentSignup = Signup(
+//            id = i,
+//            uuid = UUID.randomUUID().toString(),
+//            name = faker.name.name()
+//        )
+//        repo.save(recentSignup)
+//    }
+//    println("Created items")
 
     for (i in 1..5) {
         println()
