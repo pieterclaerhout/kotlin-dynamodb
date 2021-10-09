@@ -35,14 +35,13 @@ object Main {
 
         log.info("Creating items…")
         val signups = mutableListOf<Signup>()
-        for (i in 1L..100L) {
+        for (i in 1L..10L) {
             val recentSignup = Signup(
                 id = i,
                 uuid = UUID.randomUUID().toString(),
                 name = faker.name.name()
             )
             signups.add(recentSignup)
-//        repo.save(recentSignup)
         }
         repo.saveMany(signups)
         log.info("Created items")

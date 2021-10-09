@@ -1,4 +1,3 @@
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
 import software.amazon.awssdk.enhanced.dynamodb.Key
@@ -8,15 +7,13 @@ import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest
 import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.ResourceInUseException
-import software.amazon.awssdk.services.dynamodb.model.TimeToLiveSpecification
-import software.amazon.awssdk.services.dynamodb.model.UpdateTimeToLiveRequest
+import software.amazon.awssdk.services.dynamodb.model.*
 import java.util.*
 
 
 class SignupRepo(private val client: DynamoDbClient) {
 
-    private val tableName = "signups_v4"
+    private val tableName = "signups_v5"
     private val enhancedClient = DynamoDbEnhancedClient.builder().dynamoDbClient(client).build()
     private val table = enhancedClient.table(tableName, tableSchema)
 
@@ -26,16 +23,45 @@ class SignupRepo(private val client: DynamoDbClient) {
             // Async…
             table.createTable()
             log.info("Created: ${table.tableName()}")
-            Thread.sleep(5000L)
         } catch (e: ResourceInUseException) {
             log.info("Exists: ${table.tableName()}")
         }
 
+//        try {
+//            for (i in 1..10) {
+//                try {
+//                    GlobalSecondaryIndex.builder()
+//                        .indexName("tableName-uuid-index")
+//                        .keySchema(
+//                            KeySchemaElement.builder().attributeName("tableName").keyType(KeyType.HASH).build(),
+//                            KeySchemaElement.builder().attributeName("uuid").keyType(KeyType.RANGE).build()
+//                        ).build()
+//                    } catch (e: ResourceNotFoundException) {
+//                    log.warn("${i} - Table doesn't exist yet")
+//                } catch (e: ResourceInUseException) {
+//                    log.warn("${i} - Table doesn't exist yet")
+//                }
+//                Thread.sleep(1000)
+//            }
+//        } catch (e: Exception) {
+//            log.info("TTL already enabled: ${e}")
+//        }
+
         try {
-            updateTtl("expiresOn")
-            log.info("Set TTL: ${table.tableName()}")
+            for (i in 1..10) {
+                try {
+                    updateTtl("expiresOn")
+                    log.info("Set TTL: ${table.tableName()}")
+                    break
+                } catch (e: ResourceNotFoundException) {
+                    log.warn("${i} - Table doesn't exist yet")
+                } catch (e: ResourceInUseException) {
+                    log.warn("${i} - Table doesn't exist yet")
+                }
+                Thread.sleep(1000)
+            }
         } catch (e: Exception) {
-            log.info("TTL already enabled")
+            log.info("TTL already enabled: ${e}")
         }
 
     }
@@ -87,11 +113,30 @@ class SignupRepo(private val client: DynamoDbClient) {
     }
 
     fun randomItems(limit: Int): List<Signup> {
-        val key = Key.builder().partitionValue(tableName).sortValue(UUID.randomUUID().toString()).build()
-        val cond = QueryConditional.sortGreaterThan(key)
-        return table.query(
-            QueryEnhancedRequest.builder().queryConditional(cond).limit(limit).build()
-        )?.first()?.items().orEmpty()
+
+        var items = mutableListOf<Signup>()
+
+        val index = table.index("tableName-uuid-index")
+
+        // Only fails if number of items is lower than limit
+        while (items.size < limit) {
+
+            val key = Key.builder()
+                .partitionValue(tableName)
+                .sortValue(UUID.randomUUID().toString())
+                .build()
+            val cond = QueryConditional.sortGreaterThanOrEqualTo(key)
+            val item = index.query(
+                QueryEnhancedRequest.builder().queryConditional(cond).limit(1).build()
+            )?.first()?.items().orEmpty()
+            if (item.size == 1) {
+                items.add(item.first())
+            }
+
+        }
+
+        return items
+
     }
 
     private fun updateTtl(field: String) {
